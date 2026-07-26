@@ -1,0 +1,45 @@
+name: vt_app
+description: Smart Attendance Management System
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  supabase_flutter: ^2.8.0
+  flutter_riverpod: ^3.1.0
+  riverpod_annotation: ^4.0.0
+  go_router: ^17.3.0
+  geolocator: ^14.0.0
+  permission_handler: ^12.0.0+1
+  intl: ^0.20.0
+  mobile_scanner: ^6.0.0
+  qr_flutter: ^4.1.0
+  shimmer: ^3.0.0
+  flutter_animate: ^4.5.0
+  local_auth: ^2.3.0
+  shared_preferences: ^2.3.0
+  fl_chart: ^0.70.2
+  crypto: ^3.0.6
+  pdf: ^3.11.0
+  printing: ^5.14.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  build_runner: ^2.15.0
+  riverpod_generator: ^4.0.0+1
+  custom_lint: ^0.8.0
+  riverpod_lint: ^3.1.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/logo.png
+    - assets/fonts/NotoSans-Regular.ttf
+    - assets/fonts/NotoSans-Bold.ttf
