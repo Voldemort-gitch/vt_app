@@ -1,4 +1,4 @@
-# vt_app
+# Visual Time — Smart Attendance Management System
 
 A new Flutter project.
 
