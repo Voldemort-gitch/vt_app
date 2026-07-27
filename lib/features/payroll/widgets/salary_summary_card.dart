@@ -32,7 +32,7 @@ class SalarySummaryCard extends StatelessWidget {
             children: [
               Icon(icon, color: color, size: 22),
               const SizedBox(height: 6),
-              Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+              Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
               const SizedBox(height: 2),
               Text(label, style: TextStyle(fontSize: 11, color: Colors.grey.shade400), textAlign: TextAlign.center),
             ],

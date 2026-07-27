@@ -14,8 +14,8 @@ class AdminSalaryConfig extends ConsumerStatefulWidget {
 
 class _AdminSalaryConfigState extends ConsumerState<AdminSalaryConfig> {
   List<ProfileModel> _employees = [];
-  Map<String, EmployeeSalaryModel?> _salaries = {};
-  Map<String, SalaryComponentModel?> _components = {};
+  final Map<String, EmployeeSalaryModel?> _salaries = {};
+  final Map<String, SalaryComponentModel?> _components = {};
   bool _isLoading = true;
 
   @override
@@ -51,6 +51,7 @@ class _AdminSalaryConfigState extends ConsumerState<AdminSalaryConfig> {
     final healthC = TextEditingController(text: (comp?.healthInsurance ?? 0).toString());
     final profTaxC = TextEditingController(text: (comp?.professionalTax ?? 200).toString());
     final tdsC = TextEditingController(text: (comp?.tds ?? 0).toString());
+    DateTime? _effectiveDate = sal?.effectiveFrom;
 
     showDialog(
       context: context,
@@ -110,7 +111,7 @@ class _AdminSalaryConfigState extends ConsumerState<AdminSalaryConfig> {
                   monthlySalary: double.tryParse(salaryC.text) ?? 0,
                   workingDays: int.tryParse(daysC.text) ?? 30,
                   allowedLeaves: int.tryParse(leavesC.text) ?? 4,
-                  effectiveFrom: DateTime.now(),
+                  effectiveFrom: _effectiveDate ?? DateTime.now(),
                 );
                 await SupabaseService.setSalaryComponents(
                   employeeId: emp.id,
@@ -125,13 +126,17 @@ class _AdminSalaryConfigState extends ConsumerState<AdminSalaryConfig> {
                 );
                 if (ctx.mounted) Navigator.pop(ctx);
                 _load();
-                if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Salary saved'), backgroundColor: Color(0xFF3B82F6)),
                 );
+                }
               } catch (e) {
-                if (ctx.mounted) ScaffoldMessenger.of(ctx).showSnackBar(
+                if (ctx.mounted) {
+                  ScaffoldMessenger.of(ctx).showSnackBar(
                   SnackBar(content: Text('Error: $e'), backgroundColor: const Color(0xFFDC2626)),
                 );
+                }
               }
             },
             child: const Text('Save'),
@@ -204,7 +209,7 @@ class _AdminSalaryConfigState extends ConsumerState<AdminSalaryConfig> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(emp.name, style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white)),
-                                    Text('${emp.employeeCode}', style: TextStyle(color: Colors.grey.shade400, fontSize: 12)),
+                                    Text(emp.employeeCode, style: TextStyle(color: Colors.grey.shade400, fontSize: 12)),
                                   ],
                                 ),
                               ),

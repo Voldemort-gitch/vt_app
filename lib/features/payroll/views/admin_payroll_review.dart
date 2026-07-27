@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:printing/printing.dart';
 import '../../../shared/models/payroll_record_model.dart';
-import '../../../shared/services/supabase_service.dart';
 import '../providers/payroll_provider.dart';
 import '../utils/payslip_generator.dart';
 

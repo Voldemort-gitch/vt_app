@@ -13,6 +13,7 @@ import '../../features/attendance/views/admin_attendance_screen.dart';
 import '../../features/employees/views/admin_employee_crud_screen.dart';
 import '../../features/leave/views/employee_leave_request_screen.dart';
 import '../../features/leave/views/admin_leave_approval_screen.dart';
+import '../../features/leave/views/admin_leave_calendar_screen.dart';
 import '../../features/settings/views/admin_settings_screen.dart';
 import '../../features/qr/views/qr_scanner_screen.dart';
 import '../../features/qr/views/qr_display_screen.dart';
@@ -108,6 +109,12 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: 'leave',
             builder: (context, state) => const AdminLeaveApprovalScreen(),
+            routes: [
+              GoRoute(
+                path: 'calendar',
+                builder: (context, state) => const AdminLeaveCalendarScreen(),
+              ),
+            ],
           ),
           GoRoute(
             path: 'reports',

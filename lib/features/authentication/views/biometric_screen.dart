@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:local_auth/local_auth.dart';
+import '../../../core/utils/logger.dart';
 import '../providers/auth_provider.dart';
 
 class BiometricScreen extends ConsumerStatefulWidget {
@@ -43,13 +44,14 @@ class _BiometricScreenState extends ConsumerState<BiometricScreen> {
         }
       }
     } catch (e) {
+      logBiometric.warning('Biometric auth failed: $e');
       if (e.toString().contains('LockedOut')) {
         await ref.read(authStateProvider.notifier).signOut();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: const Text('Too many failed attempts. Use password to sign in.'),
-              backgroundColor: Color(0xFFD97706),
+              backgroundColor: const Color(0xFFD97706),
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),

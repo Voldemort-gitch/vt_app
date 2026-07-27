@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/utils/logger.dart';
 import '../../../shared/models/payroll_record_model.dart';
 import '../../../shared/services/supabase_service.dart';
 
@@ -28,6 +29,7 @@ class PayrollNotifier extends Notifier<PayrollState> {
       final records = await SupabaseService.getPayrollRecords(month, year);
       state = PayrollState(records: records);
     } catch (e) {
+      logPayroll.warning('Failed to load payroll', e);
       state = PayrollState(error: 'Failed to load payroll');
     }
   }
@@ -46,6 +48,7 @@ class PayrollNotifier extends Notifier<PayrollState> {
         state = PayrollState(error: result['error']?.toString() ?? 'Generation failed');
       }
     } catch (e) {
+      logPayroll.severe('Payroll generation failed', e);
       state = PayrollState(error: 'Failed to generate payroll');
     }
   }
@@ -72,6 +75,7 @@ class PayrollNotifier extends Notifier<PayrollState> {
         successMessage: 'Payroll $status successfully',
       );
     } catch (e) {
+      logPayroll.warning('Payroll status update failed', e);
       state = PayrollState(error: 'Failed to update status', records: state.records);
     }
   }

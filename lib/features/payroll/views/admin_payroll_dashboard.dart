@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../shared/services/supabase_service.dart';
 import '../../../shared/models/payroll_record_model.dart';
-import '../../../shared/models/profile_model.dart';
 import '../widgets/payroll_status_badge.dart';
 
 class AdminPayrollDashboard extends StatefulWidget {
@@ -119,7 +118,7 @@ class _AdminPayrollDashboardState extends State<AdminPayrollDashboard> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.calendar_today, color: const Color(0xFF3B82F6), size: 20),
+                  const Icon(Icons.calendar_today, color: Color(0xFF3B82F6), size: 20),
                   const SizedBox(width: 10),
                   Text('${_mn(_month)} $_year', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                   const Spacer(),

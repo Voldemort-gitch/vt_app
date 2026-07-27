@@ -295,6 +295,9 @@ verify_jwt = true
 [functions.generate-payroll]
 verify_jwt = true
 
+[functions.process-attendance]
+verify_jwt = true
+
 [analytics]
 enabled = true
 port = 54327

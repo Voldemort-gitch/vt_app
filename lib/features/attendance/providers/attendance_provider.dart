@@ -3,6 +3,7 @@ import '../../../shared/models/attendance_model.dart';
 import '../../../shared/models/company_settings_model.dart';
 import '../../../shared/services/supabase_service.dart';
 import '../../../core/utils/location_service.dart';
+import '../../../core/utils/logger.dart';
 import '../../../core/utils/attendance_helper.dart';
 
 class AttendanceState {
@@ -69,6 +70,7 @@ class AttendanceNotifier extends Notifier<AttendanceState> {
         isLoading: false,
       );
     } catch (e) {
+      logAttendance.severe('Load today attendance failed', e);
       state = state.copyWith(
         isLoading: false,
         error: 'Session expired. Please sign in again.',
@@ -105,21 +107,20 @@ class AttendanceNotifier extends Notifier<AttendanceState> {
         return;
       }
 
-      // TODO: Re-enable geofencing in production
-      // final isWithin = LocationService.isWithinRadius(
-      //   userLat: position.latitude,
-      //   userLng: position.longitude,
-      //   officeLat: settings.officeLatitude,
-      //   officeLng: settings.officeLongitude,
-      //   allowedRadius: settings.allowedRadius,
-      // );
-      // if (!isWithin) {
-      //   state = state.copyWith(
-      //     isProcessing: false,
-      //     error: 'You are not within the office premises.',
-      //   );
-      //   return;
-      // }
+      final isWithin = LocationService.isWithinRadius(
+        userLat: position.latitude,
+        userLng: position.longitude,
+        officeLat: settings.officeLatitude,
+        officeLng: settings.officeLongitude,
+        allowedRadius: settings.allowedRadius,
+      );
+      if (!isWithin) {
+        state = state.copyWith(
+          isProcessing: false,
+          error: 'You are not within the office premises.',
+        );
+        return;
+      }
 
       final userId = SupabaseService.currentUserId;
       if (userId == null) {
@@ -140,7 +141,6 @@ class AttendanceNotifier extends Notifier<AttendanceState> {
         employeeId: userId,
         latitude: position.latitude,
         longitude: position.longitude,
-        status: status,
       );
 
       final attendance = await SupabaseService.getTodayAttendance(userId);
@@ -150,9 +150,10 @@ class AttendanceNotifier extends Notifier<AttendanceState> {
         successMessage: status == 'late' ? 'Checked in (Late)' : 'Checked in successfully!',
       );
     } catch (e) {
+      logAttendance.severe('Check-out failed', e);
       state = state.copyWith(
         isProcessing: false,
-        error: 'Session expired. Please sign in again.',
+        error: 'Check-out failed. Try again.',
       );
     }
   }
@@ -186,21 +187,20 @@ class AttendanceNotifier extends Notifier<AttendanceState> {
         return;
       }
 
-      // TODO: Re-enable geofencing in production
-      // final isWithin = LocationService.isWithinRadius(
-      //   userLat: position.latitude,
-      //   userLng: position.longitude,
-      //   officeLat: settings.officeLatitude,
-      //   officeLng: settings.officeLongitude,
-      //   allowedRadius: settings.allowedRadius,
-      // );
-      // if (!isWithin) {
-      //   state = state.copyWith(
-      //     isProcessing: false,
-      //     error: 'You are not within the office premises.',
-      //   );
-      //   return;
-      // }
+      final isWithin = LocationService.isWithinRadius(
+        userLat: position.latitude,
+        userLng: position.longitude,
+        officeLat: settings.officeLatitude,
+        officeLng: settings.officeLongitude,
+        allowedRadius: settings.allowedRadius,
+      );
+      if (!isWithin) {
+        state = state.copyWith(
+          isProcessing: false,
+          error: 'You are not within the office premises.',
+        );
+        return;
+      }
 
       final userId = SupabaseService.currentUserId;
       if (userId == null) {
@@ -225,27 +225,32 @@ class AttendanceNotifier extends Notifier<AttendanceState> {
         checkOut: DateTime.now(),
       );
 
-      await SupabaseService.checkOut(
+      final result = await SupabaseService.checkOut(
         employeeId: userId,
         latitude: position.latitude,
         longitude: position.longitude,
-        workingMinutes: workingMinutes,
       );
 
-      // Recalculate status server-side to prevent client-side tampering
-      if (settings != null) {
-        final correctStatus = AttendanceHelper.determineStatus(
-          checkInTime: checkInTime,
-          officeStartTime: settings.officeStartTime,
-          lateAfterMinutes: settings.lateAfterMinutes,
+      if (result['success'] != true) {
+        state = state.copyWith(
+          isProcessing: false,
+          error: result['error']?.toString() ?? 'Check-out failed.',
         );
-        final today = DateTime.now().toIso8601String().split('T')[0];
-        await SupabaseService.client
-            .from('attendance')
-            .update({'status': correctStatus})
-            .eq('employee_id', userId)
-            .eq('attendance_date', today);
+        return;
       }
+
+      // Recalculate status server-side to prevent client-side tampering
+      final correctStatus = AttendanceHelper.determineStatus(
+        checkInTime: checkInTime,
+        officeStartTime: settings.officeStartTime,
+        lateAfterMinutes: settings.lateAfterMinutes,
+      );
+      final today = DateTime.now().toIso8601String().split('T')[0];
+      await SupabaseService.client
+          .from('attendance')
+          .update({'status': correctStatus})
+          .eq('employee_id', userId)
+          .eq('attendance_date', today);
 
       final attendance = await SupabaseService.getTodayAttendance(userId);
       state = state.copyWith(
@@ -296,6 +301,7 @@ class AttendanceNotifier extends Notifier<AttendanceState> {
         successMessage: 'Auto checked out',
       );
     } catch (e) {
+      logAttendance.warning('Auto check-out failed', e);
       state = state.copyWith(isProcessing: false, error: 'Auto check-out failed');
     }
   }

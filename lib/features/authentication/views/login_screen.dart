@@ -257,9 +257,36 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     ),
                                     validator: (value) {
                                       if (value == null || value.isEmpty) return 'Please enter your PIN';
-                                      if (value.length < 4) return 'PIN must be at least 4 digits';
+                                      if (value.length < 6) return 'PIN must be at least 6 digits';
                                       return null;
                                     },
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: GestureDetector(
+                                      onTap: () => showDialog(
+                                        context: context,
+                                        builder: (ctx) => AlertDialog(
+                                          backgroundColor: const Color(0xFF1E293B),
+                                          title: const Text('Forgot PIN?', style: TextStyle(color: Colors.white)),
+                                          content: const Text(
+                                            'Please contact your administrator to reset your PIN.\n\n'
+                                            'Your admin can set a new PIN from:\n'
+                                            'Employees → select employee → Reset PIN.',
+                                            style: TextStyle(color: Colors.white70, fontSize: 14),
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.pop(ctx),
+                                              child: const Text('OK'),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      child: const Text('Forgot PIN?',
+                                        style: TextStyle(color: Color(0xFF3B82F6), fontSize: 12, decoration: TextDecoration.underline)),
+                                    ),
                                   ),
                                 ] else ...[
                                   TextFormField(

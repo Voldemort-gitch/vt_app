@@ -110,7 +110,7 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.calendar_today, color: const Color(0xFF3B82F6), size: 20),
+                  const Icon(Icons.calendar_today, color: Color(0xFF3B82F6), size: 20),
                   const SizedBox(width: 10),
                   Text('${_mn(_month)} $_year', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                   const Spacer(),

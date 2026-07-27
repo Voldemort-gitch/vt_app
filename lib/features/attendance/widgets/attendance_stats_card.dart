@@ -2,7 +2,6 @@ import 'dart:ui';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import '../../../shared/services/supabase_service.dart';
-import '../../../shared/models/attendance_model.dart';
 
 class AttendanceStatsCard extends StatefulWidget {
   const AttendanceStatsCard({super.key});
@@ -83,11 +82,11 @@ class _AttendanceStatsCardState extends State<AttendanceStatsCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
+              const Row(
                 children: [
-                  Icon(Icons.bar_chart, size: 18, color: const Color(0xFF3B82F6)),
-                  const SizedBox(width: 8),
-                  const Text(
+                  Icon(Icons.bar_chart, size: 18, color: Color(0xFF3B82F6)),
+                  SizedBox(width: 8),
+                  Text(
                     'Attendance Statistics',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
@@ -154,7 +153,7 @@ class _AttendanceStatsCardState extends State<AttendanceStatsCard> {
       PieChartSectionData(
         color: const Color(0xFF14B8A6),
         value: _present.toDouble(),
-        title: '${_present}',
+        title: '$_present',
         titleStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
         radius: 45,
       ),

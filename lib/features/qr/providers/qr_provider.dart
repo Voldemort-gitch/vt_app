@@ -2,27 +2,19 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../shared/services/supabase_service.dart';
 import '../../../core/utils/location_service.dart';
-import '../../../core/utils/attendance_helper.dart';
+import '../../../core/utils/logger.dart';
 
 class QrResult {
   final String companyId;
-  final double lat;
-  final double lng;
 
-  QrResult({
-    required this.companyId,
-    required this.lat,
-    required this.lng,
-  });
+  QrResult({required this.companyId});
 
   static QrResult? fromJson(String jsonString) {
     try {
       final data = jsonDecode(jsonString) as Map<String, dynamic>;
-      return QrResult(
-        companyId: data['co'] as String,
-        lat: (data['la'] as num).toDouble(),
-        lng: (data['lo'] as num).toDouble(),
-      );
+      final co = data['co'] as String?;
+      if (co == null) return null;
+      return QrResult(companyId: co);
     } catch (_) {
       return null;
     }
@@ -60,14 +52,6 @@ class QrScanNotifier extends Notifier<QrScanState> {
       return null;
     }
 
-    final settings = await SupabaseService.getCompanySettings();
-    if (qr.companyId != 'vt_office') {
-      state = QrScanState(error: 'This QR code is not for this office');
-      return null;
-    }
-
-    state = QrScanState(isScanning: true, isProcessing: true);
-
     final position = await LocationService.getCurrentLocation();
     if (position == null) {
       state = QrScanState(error: 'Could not get GPS location');
@@ -79,50 +63,30 @@ class QrScanNotifier extends Notifier<QrScanState> {
       return null;
     }
 
-    final coordsConfigured =
-        settings.officeLatitude != 0.0 || settings.officeLongitude != 0.0;
-    if (coordsConfigured) {
-      final isWithin = LocationService.isWithinRadius(
-        userLat: position.latitude,
-        userLng: position.longitude,
-        officeLat: settings.officeLatitude,
-        officeLng: settings.officeLongitude,
-        allowedRadius: settings.allowedRadius,
-      );
-      if (!isWithin) {
-        state = QrScanState(
-          error: 'Not at office location. Please scan the QR at the office.',
-        );
-        return null;
-      }
-    }
-
     final userId = SupabaseService.currentUserId;
     if (userId == null) {
       state = QrScanState(error: 'User not authenticated');
       return null;
     }
 
-    final status = AttendanceHelper.determineStatus(
-      checkInTime: DateTime.now(),
-      officeStartTime: settings.officeStartTime,
-      lateAfterMinutes: settings.lateAfterMinutes,
-    );
-
     try {
-      await SupabaseService.checkIn(
+      final result = await SupabaseService.checkIn(
         employeeId: userId,
-        latitude: qr.lat,
-        longitude: qr.lng,
-        status: status,
+        latitude: position.latitude,
+        longitude: position.longitude,
+        companyId: qr.companyId,
       );
-      state = QrScanState(
-        successMessage: status == 'late'
-            ? 'Checked in (Late)'
-            : 'Checked in successfully!',
-      );
-      return status;
+
+      if (result['success'] != true) {
+        state = QrScanState(error: result['error']?.toString() ?? 'Check-in failed.');
+        return null;
+      }
+
+      final msg = result['message'] as String? ?? 'Checked in successfully!';
+      state = QrScanState(successMessage: msg);
+      return result['status'] as String? ?? 'present';
     } catch (e) {
+      logAttendance.warning('QR check-in failed', e);
       state = QrScanState(error: 'Check-in failed. Please try again.');
       return null;
     }

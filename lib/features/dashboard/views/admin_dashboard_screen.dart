@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -85,14 +84,14 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
     final authState = ref.watch(authStateProvider);
 
     final cards = [
-      _CardData(Icons.people, 'Employees', 'Manage staff', const [Color(0xFF3B82F6), Color(0xFF1D4ED8)]),
-      _CardData(Icons.fact_check, 'Attendance', 'View records', const [Color(0xFF2563EB), Color(0xFF7C3AED)]),
+      const _CardData(Icons.people, 'Employees', 'Manage staff', [Color(0xFF3B82F6), Color(0xFF1D4ED8)]),
+      const _CardData(Icons.fact_check, 'Attendance', 'View records', [Color(0xFF2563EB), Color(0xFF7C3AED)]),
       _CardData(Icons.event_busy, 'Leave Requests', _pendingLeaves > 0 ? '$_pendingLeaves pending' : 'Approve / Reject', const [Color(0xFFEA580C), Color(0xFFD97706)]),
       _CardData(Icons.request_page, 'Advance', _pendingAdvances > 0 ? '$_pendingAdvances pending' : 'Approve / Reject', const [Color(0xFFE11D48), Color(0xFFBE123C)]),
-      _CardData(Icons.account_balance, 'Payroll', 'Manage salaries', const [Color(0xFF059669), Color(0xFF047857)]),
-      _CardData(Icons.assessment, 'Reports', 'Generate reports', const [Color(0xFF7C3AED), Color(0xFFDB2777)]),
-      _CardData(Icons.settings, 'Settings', 'Company config', const [Color(0xFF475569), Color(0xFF3B82F6)]),
-      _CardData(Icons.qr_code, 'QR Code', 'Generate office QR', const [Color(0xFF4F46E5), Color(0xFF7C3AED)]),
+      const _CardData(Icons.account_balance, 'Payroll', 'Manage salaries', [Color(0xFF059669), Color(0xFF047857)]),
+      const _CardData(Icons.assessment, 'Reports', 'Generate reports', [Color(0xFF7C3AED), Color(0xFFDB2777)]),
+      const _CardData(Icons.settings, 'Settings', 'Company config', [Color(0xFF475569), Color(0xFF3B82F6)]),
+      const _CardData(Icons.qr_code, 'QR Code', 'Generate office QR', [Color(0xFF4F46E5), Color(0xFF7C3AED)]),
     ];
 
     return Scaffold(
@@ -189,9 +188,9 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.calendar_today, size: 14, color: const Color(0xFF3B82F6)),
+                    const Icon(Icons.calendar_today, size: 14, color: Color(0xFF3B82F6)),
                     const SizedBox(width: 6),
-                    Text('${_mn(_payslipMonth)} ${_payslipYear}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white)),
+                    Text('${_mn(_payslipMonth)} $_payslipYear', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white)),
                   ],
                 ),
               ),
@@ -246,7 +245,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                       onPressed: () async {
                         try {
                           final pdf = await PayslipGenerator.generate(record: payroll, employeeName: emp.name, employeeCode: emp.employeeCode);
-                          await Printing.sharePdf(bytes: pdf, filename: 'payslip_${_mn(_payslipMonth)}_${_payslipYear}.pdf');
+                          await Printing.sharePdf(bytes: pdf, filename: 'payslip_${_mn(_payslipMonth)}_$_payslipYear.pdf');
                         } catch (e) {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));

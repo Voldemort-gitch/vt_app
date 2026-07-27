@@ -32,6 +32,7 @@ class _EmployeeLeaveRequestScreenState extends State<EmployeeLeaveRequestScreen>
   void _showSubmitDialog() {
     DateTime? fromDate;
     DateTime? toDate;
+    String _leaveType = 'casual';
     final reasonController = TextEditingController();
 
     showDialog(
@@ -73,8 +74,20 @@ class _EmployeeLeaveRequestScreenState extends State<EmployeeLeaveRequestScreen>
                 TextField(
                   controller: reasonController,
                   decoration: const InputDecoration(labelText: 'Reason'),
-                  maxLines: 3,
+                  maxLines: 2,
                   style: const TextStyle(color: Colors.white),
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  value: _leaveType,
+                  dropdownColor: const Color(0xFF1E293B),
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(labelText: 'Leave Type', prefixIcon: Icon(Icons.category, size: 20)),
+                  items: ['sick', 'casual', 'annual'].map((t) => DropdownMenuItem(
+                    value: t,
+                    child: Text(SupabaseService.leaveTypeLabels[t] ?? t),
+                  )).toList(),
+                  onChanged: (v) { if (v != null) setDialogState(() => _leaveType = v); },
                 ),
               ],
             ),
@@ -89,22 +102,43 @@ class _EmployeeLeaveRequestScreenState extends State<EmployeeLeaveRequestScreen>
                 }
                 final userId = SupabaseService.currentUserId;
                 if (userId == null) return;
-                final month = fromDate!.month;
-                final year = fromDate!.year;
-                final hasExisting = await SupabaseService.hasApprovedLeaveInMonth(
-                  month: month, year: year, excludeEmployeeId: userId,
-                );
-                if (hasExisting) {
+                // Check: user already has a pending leave
+                final myLeaves = await SupabaseService.getMyLeaveRequests(userId);
+                if (myLeaves.any((l) => l.isPending)) {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text('Another employee already has approved leave this month. Only one employee per month allowed.'),
+                      content: Text('You already have a pending leave request. Wait for it to be approved first.'),
+                      backgroundColor: Color(0xFFDC2626),
+                    ));
+                  }
+                  return;
+                }
+                final month = fromDate!.month;
+                final year = fromDate!.year;
+                final days = toDate!.difference(fromDate!).inDays + 1;
+                final hasBalance = await SupabaseService.hasLeaveBalance(userId, _leaveType, days);
+                if (!hasBalance) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text('Insufficient leave balance for selected type.'),
+                      backgroundColor: Color(0xFFDC2626),
+                    ));
+                  }
+                  return;
+                }
+                final limitReached = await SupabaseService.hasReachedLeaveLimit(month: month, year: year);
+                if (limitReached) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text('Leave limit reached this month. Only 2 employees can take leave per month.'),
                       backgroundColor: Color(0xFFDC2626),
                     ));
                   }
                   return;
                 }
                 await SupabaseService.submitLeaveRequest(
-                  employeeId: userId, fromDate: fromDate!, toDate: toDate!, reason: reasonController.text.trim(),
+                  employeeId: userId, fromDate: fromDate!, toDate: toDate!,
+                  reason: reasonController.text.trim(), leaveType: _leaveType,
                 );
                 if (context.mounted) Navigator.pop(context);
                 _loadRequests();

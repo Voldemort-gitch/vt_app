@@ -400,11 +400,11 @@ class _EmployeeDashboardScreenState
 
   Widget _buildQuickAccess() {
     final items = [
-      _QaItem(Icons.history, 'History', const Color(0xFF3B82F6), '/employee/history'),
-      _QaItem(Icons.event_busy, 'Leave', const Color(0xFFEA580C), '/employee/leave'),
-      _QaItem(Icons.account_balance, 'Payroll', const Color(0xFF059669), '/employee/salary'),
-      _QaItem(Icons.request_page, 'Advance', const Color(0xFFE11D48), '/employee/advance'),
-      _QaItem(Icons.person, 'Profile', const Color(0xFF7C3AED), '/employee/profile'),
+      const _QaItem(Icons.history, 'History', Color(0xFF3B82F6), '/employee/history'),
+      const _QaItem(Icons.event_busy, 'Leave', Color(0xFFEA580C), '/employee/leave'),
+      const _QaItem(Icons.account_balance, 'Payroll', Color(0xFF059669), '/employee/salary'),
+      const _QaItem(Icons.request_page, 'Advance', Color(0xFFE11D48), '/employee/advance'),
+      const _QaItem(Icons.person, 'Profile', Color(0xFF7C3AED), '/employee/profile'),
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

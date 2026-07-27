@@ -34,7 +34,7 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: glassBorder, width: 0.5),
+          side: const BorderSide(color: glassBorder, width: 0.5),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(

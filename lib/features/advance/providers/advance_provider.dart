@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/utils/logger.dart';
 import '../../../shared/models/advance_request_model.dart';
 import '../../../shared/services/supabase_service.dart';
 
@@ -50,6 +51,7 @@ class AdvanceNotifier extends Notifier<AdvanceState> {
       state = AdvanceState(requests: state.requests, successMessage: 'Advance requested');
       await loadMyRequests();
     } catch (e) {
+      logAdvance.severe('Failed to submit advance', e);
       state = AdvanceState(error: 'Failed to submit request');
     }
   }
@@ -60,7 +62,7 @@ class AdvanceNotifier extends Notifier<AdvanceState> {
       if (userId == null) return;
       await SupabaseService.updateAdvanceStatus(id, status, userId);
       await loadAllRequests();
-    } catch (_) {}
+    } catch (e) { logAdvance.warning('Update status failed', e); }
   }
 }
 

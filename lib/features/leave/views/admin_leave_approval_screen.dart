@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../shared/models/leave_request_model.dart';
@@ -39,14 +40,11 @@ class _AdminLeaveApprovalScreenState extends ConsumerState<AdminLeaveApprovalScr
     final adminId = SupabaseService.currentUserId;
     if (adminId == null) return;
     if (status == 'approved') {
-      final hasExisting = await SupabaseService.hasApprovedLeaveInMonth(
-        month: req.fromDate.month, year: req.fromDate.year,
-        excludeEmployeeId: req.employeeId,
-      );
-      if (hasExisting) {
+      final limitReached = await SupabaseService.hasReachedLeaveLimit(month: req.fromDate.month, year: req.fromDate.year);
+      if (limitReached) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Another employee already has approved leave this month. Only one employee per month allowed.'),
+            content: Text('Leave limit reached this month. Only 2 employees can take leave per month.'),
             backgroundColor: Color(0xFFDC2626),
           ));
         }
@@ -54,13 +52,25 @@ class _AdminLeaveApprovalScreenState extends ConsumerState<AdminLeaveApprovalScr
       }
     }
     await SupabaseService.updateLeaveStatus(leaveId: leaveId, status: status, adminId: adminId);
+    if (status == 'approved') {
+      await SupabaseService.deductLeaveBalance(req.employeeId, req.leaveType, req.daysCount);
+    }
     _loadData();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Leave Requests')),
+      appBar: AppBar(
+        title: const Text('Leave Requests'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.calendar_month),
+            tooltip: 'Leave Calendar',
+            onPressed: () => context.push('/admin/leave/calendar'),
+          ),
+        ],
+      ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _requests.isEmpty
@@ -127,7 +137,24 @@ class _AdminLeaveApprovalScreenState extends ConsumerState<AdminLeaveApprovalScr
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 12),
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF3B82F6).withValues(alpha: 0.2),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(SupabaseService.leaveTypeLabels[req.leaveType] ?? req.leaveType,
+                                        style: const TextStyle(color: Color(0xFF3B82F6), fontSize: 11, fontWeight: FontWeight.w600)),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text('${req.daysCount} day${req.daysCount > 1 ? 's' : ''}',
+                                        style: TextStyle(color: Colors.grey.shade400, fontSize: 12)),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
                                 Text(req.reason, style: TextStyle(color: Colors.grey.shade300, fontSize: 14)),
                                 const SizedBox(height: 16),
                                 if (req.isPending)

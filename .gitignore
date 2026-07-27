@@ -45,6 +45,11 @@ app.*.map.json
 /android/app/release
 /android/build/
 
+# Keystore and signing
+*.jks
+*.keystore
+key.properties
+
 # Internal docs not for public repo
 SYSTEM_OVERVIEW.md
 
@@ -53,3 +58,4 @@ iculation
 
 # Supabase
 /supabase/.temp/
+.opencode/

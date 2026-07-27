@@ -123,7 +123,7 @@ class PayslipGenerator {
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
                   pw.Text(company, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 20, color: PdfColors.white)),
-                  pw.Text('Salary Slip', style: pw.TextStyle(fontSize: 11, color: PdfColor.fromInt(0xD9FFFFFF))),
+                  pw.Text('Salary Slip', style: const pw.TextStyle(fontSize: 11, color: PdfColor.fromInt(0xD9FFFFFF))),
                 ],
               ),
             ],
@@ -133,7 +133,7 @@ class PayslipGenerator {
             children: [
               pw.Text('$month $year', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 14, color: PdfColors.white)),
               pw.SizedBox(height: 4),
-              pw.Text('Payslip No: $slipNo', style: pw.TextStyle(fontSize: 9, color: PdfColor.fromInt(0xCCFFFFFF))),
+              pw.Text('Payslip No: $slipNo', style: const pw.TextStyle(fontSize: 9, color: PdfColor.fromInt(0xCCFFFFFF))),
             ],
           ),
         ],
@@ -149,7 +149,7 @@ class PayslipGenerator {
       decoration: pw.BoxDecoration(
         color: PdfColors.white,
         borderRadius: const pw.BorderRadius.all(pw.Radius.circular(12)),
-        border: pw.Border.all(color: PdfColor.fromInt(0xFFE5E7EB)),
+        border: pw.Border.all(color: const PdfColor.fromInt(0xFFE5E7EB)),
       ),
       child: pw.Row(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -179,7 +179,7 @@ class PayslipGenerator {
                   ],
                   if (showAccount) ...[
                     _label('Account Number'),
-                    _value(account != null && account.length > 4 ? 'XXXX${account.substring(account.length - 4)}' : account ?? ''),
+                    _value(account.length > 4 ? 'XXXX${account.substring(account.length - 4)}' : account ?? ''),
                   ],
                 ],
               ),
@@ -191,22 +191,22 @@ class PayslipGenerator {
 
   static pw.Widget _buildAttendanceSummary(Map<String, int> summary) {
     final items = [
-      ('Present', summary['present'] ?? 0, PdfColor.fromInt(0xFF10B981)),
-      ('Late', summary['late'] ?? 0, PdfColor.fromInt(0xFFF59E0B)),
-      ('Absent', summary['absent'] ?? 0, PdfColor.fromInt(0xFFDC2626)),
-      ('Leave', summary['on_leave'] ?? 0, PdfColor.fromInt(0xFF3B82F6)),
+      ('Present', summary['present'] ?? 0, const PdfColor.fromInt(0xFF10B981)),
+      ('Late', summary['late'] ?? 0, const PdfColor.fromInt(0xFFF59E0B)),
+      ('Absent', summary['absent'] ?? 0, const PdfColor.fromInt(0xFFDC2626)),
+      ('Leave', summary['on_leave'] ?? 0, const PdfColor.fromInt(0xFF3B82F6)),
     ];
     return pw.Container(
       padding: const pw.EdgeInsets.all(10),
       decoration: pw.BoxDecoration(
         color: PdfColors.white,
         borderRadius: const pw.BorderRadius.all(pw.Radius.circular(10)),
-        border: pw.Border.all(color: PdfColor.fromInt(0xFFE5E7EB)),
+        border: pw.Border.all(color: const PdfColor.fromInt(0xFFE5E7EB)),
       ),
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.Text('ATTENDANCE SUMMARY', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10, color: PdfColor.fromInt(0xFF6B7280), letterSpacing: 1)),
+          pw.Text('ATTENDANCE SUMMARY', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10, color: const PdfColor.fromInt(0xFF6B7280), letterSpacing: 1)),
           pw.SizedBox(height: 6),
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceEvenly,
@@ -214,7 +214,7 @@ class PayslipGenerator {
               return pw.Column(
                 children: [
                   pw.Text(item.$2.toString(), style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 14, color: item.$3)),
-                  pw.Text(item.$1, style: pw.TextStyle(fontSize: 8, color: PdfColor.fromInt(0xFF9CA3AF))),
+                  pw.Text(item.$1, style: const pw.TextStyle(fontSize: 8, color: PdfColor.fromInt(0xFF9CA3AF))),
                 ],
               );
             }).toList(),
@@ -259,18 +259,18 @@ class PayslipGenerator {
   static (String, double, bool) _sep() => ('', 0, false);
 
   static pw.Widget _tableCard(String title, List<(String, double, bool)> rows) {
-    final color = title == 'EARNINGS' ? PdfColor.fromInt(0xFF2563EB) : PdfColor.fromInt(0xFFDC2626);
+    final color = title == 'EARNINGS' ? const PdfColor.fromInt(0xFF2563EB) : const PdfColor.fromInt(0xFFDC2626);
     return pw.Container(
       padding: const pw.EdgeInsets.all(14),
       decoration: pw.BoxDecoration(
         color: PdfColors.white,
         borderRadius: const pw.BorderRadius.all(pw.Radius.circular(12)),
-        border: pw.Border.all(color: PdfColor.fromInt(0xFFE5E7EB)),
+        border: pw.Border.all(color: const PdfColor.fromInt(0xFFE5E7EB)),
       ),
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.Text(title, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 12, color: PdfColor.fromInt(0xFF374151), letterSpacing: 1)),
+          pw.Text(title, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 12, color: const PdfColor.fromInt(0xFF374151), letterSpacing: 1)),
           pw.SizedBox(height: 10),
           for (final row in rows) ...[
             if (row.$1.isEmpty && row.$2 == 0)
@@ -289,27 +289,27 @@ class PayslipGenerator {
   }
 
   static pw.Widget _row(String label, double amount, bool isTotal, PdfColor? accent) {
-    final isEarningsTotal = isTotal && accent == PdfColor.fromInt(0xFF2563EB);
-    final isDedTotal = isTotal && accent == PdfColor.fromInt(0xFFDC2626);
+    final isEarningsTotal = isTotal && accent == const PdfColor.fromInt(0xFF2563EB);
+    final isDedTotal = isTotal && accent == const PdfColor.fromInt(0xFFDC2626);
     return pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       children: [
         pw.Text(label, style: pw.TextStyle(
           fontSize: isTotal ? 11 : 10,
           fontWeight: isTotal ? pw.FontWeight.bold : pw.FontWeight.normal,
-          color: isEarningsTotal ? PdfColor.fromInt(0xFF2563EB) : isDedTotal ? PdfColor.fromInt(0xFFDC2626) : PdfColor.fromInt(0xFF111827),
+          color: isEarningsTotal ? const PdfColor.fromInt(0xFF2563EB) : isDedTotal ? const PdfColor.fromInt(0xFFDC2626) : const PdfColor.fromInt(0xFF111827),
         )),
         pw.Text('₹ ${_fmt(amount)}', style: pw.TextStyle(
           fontSize: isTotal ? 12 : 10,
           fontWeight: pw.FontWeight.bold,
-          color: isEarningsTotal ? PdfColor.fromInt(0xFF2563EB) : isDedTotal ? PdfColor.fromInt(0xFFDC2626) : PdfColor.fromInt(0xFF111827),
+          color: isEarningsTotal ? const PdfColor.fromInt(0xFF2563EB) : isDedTotal ? const PdfColor.fromInt(0xFFDC2626) : const PdfColor.fromInt(0xFF111827),
         )),
       ],
     );
   }
 
   static pw.Widget _divider() {
-    return pw.Container(height: 1, color: PdfColor.fromInt(0xFFE5E7EB), margin: const pw.EdgeInsets.symmetric(vertical: 2));
+    return pw.Container(height: 1, color: const PdfColor.fromInt(0xFFE5E7EB), margin: const pw.EdgeInsets.symmetric(vertical: 2));
   }
 
   static pw.Widget _buildNetPay(double netPay) {
@@ -317,15 +317,15 @@ class PayslipGenerator {
       width: double.infinity,
       padding: const pw.EdgeInsets.symmetric(vertical: 12, horizontal: 20),
       decoration: pw.BoxDecoration(
-        color: PdfColor.fromInt(0xFFEFF6FF),
+        color: const PdfColor.fromInt(0xFFEFF6FF),
         borderRadius: const pw.BorderRadius.all(pw.Radius.circular(16)),
-        border: pw.Border.all(color: PdfColor.fromInt(0xFF2563EB), width: 1),
+        border: pw.Border.all(color: const PdfColor.fromInt(0xFF2563EB), width: 1),
       ),
       child: pw.Column(
         children: [
-          pw.Text('NET PAY', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11, color: PdfColor.fromInt(0xFF6B7280), letterSpacing: 1)),
+          pw.Text('NET PAY', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11, color: const PdfColor.fromInt(0xFF6B7280), letterSpacing: 1)),
           pw.SizedBox(height: 2),
-          pw.Text('₹ ${_fmt(netPay)}', textAlign: pw.TextAlign.center, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 28, color: PdfColor.fromInt(0xFF1E3A5F))),
+          pw.Text('₹ ${_fmt(netPay)}', textAlign: pw.TextAlign.center, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 28, color: const PdfColor.fromInt(0xFF1E3A5F))),
         ],
       ),
     );
@@ -335,7 +335,7 @@ class PayslipGenerator {
     return pw.Container(
       padding: const pw.EdgeInsets.all(6),
       child: pw.Text('Amount in Words: ${_amountInWords(amount)}',
-          style: pw.TextStyle(fontSize: 9, fontStyle: pw.FontStyle.italic, color: PdfColor.fromInt(0xFF6B7280))),
+          style: pw.TextStyle(fontSize: 9, fontStyle: pw.FontStyle.italic, color: const PdfColor.fromInt(0xFF6B7280))),
     );
   }
 
@@ -346,15 +346,15 @@ class PayslipGenerator {
     final y = now.year;
     return pw.Column(
       children: [
-        pw.Divider(thickness: 0.5, color: PdfColor.fromInt(0xFFE5E7EB)),
+        pw.Divider(thickness: 0.5, color: const PdfColor.fromInt(0xFFE5E7EB)),
         pw.SizedBox(height: 6),
         pw.Text('Generated on: $d $m $y  •  Generated by Visual Time',
             textAlign: pw.TextAlign.center,
-            style: pw.TextStyle(fontSize: 8, color: PdfColor.fromInt(0xFF9CA3AF))),
+            style: const pw.TextStyle(fontSize: 8, color: PdfColor.fromInt(0xFF9CA3AF))),
         pw.SizedBox(height: 2),
         pw.Text('This is a computer generated payslip.',
             textAlign: pw.TextAlign.center,
-            style: pw.TextStyle(fontSize: 8, color: PdfColor.fromInt(0xFF9CA3AF), fontStyle: pw.FontStyle.italic)),
+            style: pw.TextStyle(fontSize: 8, color: const PdfColor.fromInt(0xFF9CA3AF), fontStyle: pw.FontStyle.italic)),
       ],
     );
   }
@@ -362,11 +362,11 @@ class PayslipGenerator {
   // --------------- Helpers ---------------
 
   static pw.Widget _label(String text) {
-    return pw.Text(text, style: pw.TextStyle(fontSize: 9, color: PdfColor.fromInt(0xFF6B7280)));
+    return pw.Text(text, style: const pw.TextStyle(fontSize: 9, color: PdfColor.fromInt(0xFF6B7280)));
   }
 
   static pw.Widget _value(String text) {
-    return pw.Text(text, style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold, color: PdfColor.fromInt(0xFF111827)));
+    return pw.Text(text, style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold, color: const PdfColor.fromInt(0xFF111827)));
   }
 
   static Future<String> _getCompanyName() async {

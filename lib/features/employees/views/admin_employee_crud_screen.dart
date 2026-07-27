@@ -29,78 +29,82 @@ class _AdminEmployeeCrudScreenState extends State<AdminEmployeeCrudScreen> {
     final nameController = TextEditingController();
     final emailController = TextEditingController();
     final phoneController = TextEditingController();
+    final codeController = TextEditingController();
+    bool saving = false;
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
-        title: const Text('Add Employee', style: TextStyle(color: Colors.white)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.blue.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.info_outline, color: Color(0xFF3B82F6), size: 18),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Create user in Supabase Dashboard first:\n'
-                      'Authentication → Users → Add User\n'
-                      'Set email + password. Then add details here.',
-                      style: TextStyle(color: Color(0xFF3B82F6), fontSize: 12),
-                    ),
-                  ),
-                ],
-              ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          backgroundColor: const Color(0xFF1E293B),
+          title: const Text('Add Employee', style: TextStyle(color: Colors.white)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(controller: nameController, decoration: const InputDecoration(labelText: 'Full Name'), style: const TextStyle(color: Colors.white)),
+              const SizedBox(height: 8),
+              TextField(controller: emailController, decoration: const InputDecoration(labelText: 'Email'), keyboardType: TextInputType.emailAddress, style: const TextStyle(color: Colors.white)),
+              const SizedBox(height: 8),
+              TextField(controller: codeController, decoration: const InputDecoration(labelText: 'Employee Code'), style: const TextStyle(color: Colors.white)),
+              const SizedBox(height: 8),
+              TextField(controller: phoneController, decoration: const InputDecoration(labelText: 'Phone (optional)'), keyboardType: TextInputType.phone, style: const TextStyle(color: Colors.white)),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: saving ? null : () => Navigator.pop(ctx), child: const Text('Cancel')),
+            ElevatedButton(
+              onPressed: saving
+                  ? null
+                  : () async {
+                      if (nameController.text.isEmpty || emailController.text.isEmpty || codeController.text.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Name, email, and code required')));
+                        return;
+                      }
+                      setDialogState(() => saving = true);
+                      try {
+                        final pass = 'emp${codeController.text.trim()}';
+                        final result = await SupabaseService.createEmployeeUser(
+                          email: emailController.text.trim(),
+                          password: pass,
+                          name: nameController.text.trim(),
+                          employeeCode: codeController.text.trim(),
+                          phone: phoneController.text.trim().isEmpty ? null : phoneController.text.trim(),
+                        );
+                        if (ctx.mounted) Navigator.pop(ctx);
+                        if (result['success'] == true) {
+                          final newId = result['user_id'] as String?;
+                          if (newId != null) SupabaseService.initLeaveBalance(newId);
+                          _loadEmployees();
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text('Created ${nameController.text.trim()} (PIN: $pass)'),
+                              backgroundColor: const Color(0xFF3B82F6),
+                            ));
+                          }
+                        } else {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text(result['error']?.toString() ?? 'Failed'),
+                              backgroundColor: const Color(0xFFDC2626),
+                            ));
+                          }
+                        }
+                      } catch (e) {
+                        setDialogState(() => saving = false);
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text('$e'),
+                            backgroundColor: const Color(0xFFDC2626),
+                          ));
+                        }
+                      }
+                    },
+              child: saving
+                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  : const Text('Add'),
             ),
-            const SizedBox(height: 16),
-            TextField(controller: nameController, decoration: const InputDecoration(labelText: 'Full Name'), style: const TextStyle(color: Colors.white)),
-            const SizedBox(height: 8),
-            TextField(controller: emailController, decoration: const InputDecoration(labelText: 'Email'), keyboardType: TextInputType.emailAddress, style: const TextStyle(color: Colors.white)),
-            const SizedBox(height: 8),
-            TextField(controller: phoneController, decoration: const InputDecoration(labelText: 'Phone'), keyboardType: TextInputType.phone, style: const TextStyle(color: Colors.white)),
           ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () async {
-              if (nameController.text.isEmpty || emailController.text.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Name and email required')));
-                return;
-              }
-              try {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Create "${emailController.text.trim()}" in Supabase Auth first'),
-                      backgroundColor: Colors.orange,
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: const Text('Create user in Supabase Dashboard first'),
-                      backgroundColor: Colors.orange,
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                }
-              }
-            },
-            child: const Text('Add'),
-          ),
-        ],
       ),
     );
   }

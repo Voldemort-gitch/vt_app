@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../../../shared/models/advance_request_model.dart';
-import '../../../shared/models/profile_model.dart';
 import '../../../shared/services/supabase_service.dart';
 import '../providers/advance_provider.dart';
 

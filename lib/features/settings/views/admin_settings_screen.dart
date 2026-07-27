@@ -20,6 +20,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
   late TextEditingController _startTimeController;
   late TextEditingController _endTimeController;
   late TextEditingController _lateAfterController;
+  late TextEditingController _maxLeaveController;
 
   @override
   void initState() {
@@ -37,6 +38,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
       _startTimeController = TextEditingController(text: settings.officeStartTime);
       _endTimeController = TextEditingController(text: settings.officeEndTime);
       _lateAfterController = TextEditingController(text: settings.lateAfterMinutes.toString());
+      _maxLeaveController = TextEditingController(text: settings.maxEmployeesOnLeave.toString());
       _isLoading = false;
     });
   }
@@ -52,6 +54,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
         'office_start_time': _startTimeController.text.trim(),
         'office_end_time': _endTimeController.text.trim(),
         'late_after_minutes': int.tryParse(_lateAfterController.text) ?? 15,
+        'max_employees_on_leave': int.tryParse(_maxLeaveController.text) ?? 2,
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -164,6 +167,17 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
           controller: _lateAfterController,
           style: const TextStyle(color: Colors.white),
           decoration: const InputDecoration(labelText: 'Late After (minutes)', prefixIcon: Icon(Icons.timer, size: 20)),
+          keyboardType: TextInputType.number,
+        ),
+      ]),
+      const SizedBox(height: 28),
+      _sectionHeader('Leave Settings'),
+      const SizedBox(height: 12),
+      _glassCard([
+        TextField(
+          controller: _maxLeaveController,
+          style: const TextStyle(color: Colors.white),
+          decoration: const InputDecoration(labelText: 'Max Employees on Leave per Month', prefixIcon: Icon(Icons.event_busy, size: 20)),
           keyboardType: TextInputType.number,
         ),
       ]),

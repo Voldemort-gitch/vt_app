@@ -6,6 +6,7 @@ class LeaveRequestModel {
   final String reason;
   final String status;
   final String? adminId;
+  final String leaveType;
   final DateTime createdAt;
 
   LeaveRequestModel({
@@ -16,12 +17,14 @@ class LeaveRequestModel {
     required this.reason,
     this.status = 'pending',
     this.adminId,
+    this.leaveType = 'casual',
     required this.createdAt,
   });
 
   bool get isPending => status == 'pending';
   bool get isApproved => status == 'approved';
   bool get isRejected => status == 'rejected';
+  int get daysCount => toDate.difference(fromDate).inDays + 1;
 
   factory LeaveRequestModel.fromJson(Map<String, dynamic> json) {
     return LeaveRequestModel(
@@ -32,6 +35,7 @@ class LeaveRequestModel {
       reason: json['reason'] as String,
       status: json['status'] as String? ?? 'pending',
       adminId: json['admin_id'] as String?,
+      leaveType: json['leave_type'] as String? ?? 'casual',
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
@@ -43,6 +47,7 @@ class LeaveRequestModel {
       'to_date': toDate.toIso8601String().split('T')[0],
       'reason': reason,
       'status': status,
+      'leave_type': leaveType,
     };
   }
 }

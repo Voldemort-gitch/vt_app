@@ -39,12 +39,12 @@ serve(async (req) => {
   }
 
   if (action === 'get-email') {
-    const { data, error } = await supabase.from('profiles').select('id').eq('employee_code', code).single()
+    const { data, error } = await supabase.from('profiles').select('id, name').eq('employee_code', code).single()
     if (error || !data) {
-      return new Response(JSON.stringify({ email: null, error: 'Employee not found' }))
+      return new Response(JSON.stringify({ email: null, user_id: null, error: 'Employee not found' }))
     }
     const { data: user } = await supabase.auth.admin.getUserById(data.id)
-    return new Response(JSON.stringify({ email: user?.user?.email || null }))
+    return new Response(JSON.stringify({ email: user?.user?.email || null, user_id: data.id }))
   }
 
   if (action === 'set-pin') {
@@ -112,6 +112,38 @@ serve(async (req) => {
       user_metadata: { login_attempts: 0, lock_until: 0 }
     })
     return new Response(JSON.stringify({ success: true }))
+  }
+
+  if (action === 'create-user') {
+    const authHeader = req.headers.get('authorization') || ''
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user } } = await supabase.auth.getUser(token)
+    if (!user) return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), { status: 401 })
+    const { data: admin } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+    if (admin?.role !== 'admin') return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), { status: 403 })
+
+    const { email, password, name, employeeCode, phone } = await req.json()
+    if (!email || !password || !name || !employeeCode) {
+      return new Response(JSON.stringify({ success: false, error: 'Missing required fields' }))
+    }
+
+    const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
+      email, password, email_confirm: true
+    })
+    if (createError || !newUser.user) {
+      return new Response(JSON.stringify({ success: false, error: createError?.message || 'Failed to create user' }))
+    }
+
+    const { error: profileError } = await supabase.from('profiles').insert({
+      id: newUser.user.id, name, employee_code: employeeCode, phone: phone || null, role: 'employee', is_active: true
+    })
+    if (profileError) {
+      // Rollback: delete the auth user if profile insert fails
+      await supabase.auth.admin.deleteUser(newUser.user.id)
+      return new Response(JSON.stringify({ success: false, error: profileError.message }))
+    }
+
+    return new Response(JSON.stringify({ success: true, user_id: newUser.user.id }))
   }
 
   return new Response(JSON.stringify({ error: 'Unknown action' }), { status: 400 })

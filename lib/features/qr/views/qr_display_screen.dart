@@ -16,6 +16,7 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen> {
   double _lat = 0;
   double _lng = 0;
   double _radius = 100;
+  String _companyId = '';
   bool _isLoading = true;
 
   @override
@@ -26,10 +27,10 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen> {
 
   Future<void> _loadSettings() async {
     final settings = await SupabaseService.getCompanySettings();
-    if (mounted) setState(() { _lat = settings.officeLatitude; _lng = settings.officeLongitude; _radius = settings.allowedRadius; _isLoading = false; });
+    if (mounted) setState(() { _lat = settings.officeLatitude; _lng = settings.officeLongitude; _radius = settings.allowedRadius; _companyId = settings.companyName.replaceAll(' ', '_').toLowerCase(); _isLoading = false; });
   }
 
-  String get _qrData => jsonEncode({'co': 'vt_office', 'la': _lat, 'lo': _lng});
+  String get _qrData => jsonEncode({'co': _companyId});
 
   @override
   Widget build(BuildContext context) {

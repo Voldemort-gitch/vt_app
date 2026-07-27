@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../../../shared/models/advance_request_model.dart';
+import '../../../shared/services/supabase_service.dart';
 import '../providers/advance_provider.dart';
 
 class EmployeeAdvanceRequest extends ConsumerStatefulWidget {
@@ -45,14 +45,26 @@ class _EmployeeAdvanceRequestState extends ConsumerState<EmployeeAdvanceRequest>
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel', style: TextStyle(color: Colors.grey))),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF3B82F6)),
-            onPressed: () async {
-              final amount = double.tryParse(amountC.text);
-              if (amount == null || amount <= 0) return;
-              await ref.read(advanceStateProvider.notifier).submitRequest(
-                amount, reasonC.text, now.month, now.year,
-              );
-              if (ctx.mounted) Navigator.pop(ctx);
-            },
+              onPressed: () async {
+                final amount = double.tryParse(amountC.text);
+                if (amount == null || amount <= 0) return;
+                final userId = SupabaseService.currentUserId;
+                if (userId == null) return;
+                final salary = await SupabaseService.getLatestEmployeeSalary(userId);
+                if (salary != null && amount > salary.monthlySalary * 0.5) {
+                  if (ctx.mounted) {
+                    ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
+                      content: Text('Maximum advance is 50% of monthly salary (₹${(salary.monthlySalary * 0.5).toStringAsFixed(0)})'),
+                      backgroundColor: const Color(0xFFDC2626),
+                    ));
+                  }
+                  return;
+                }
+                await ref.read(advanceStateProvider.notifier).submitRequest(
+                  amount, reasonC.text, now.month, now.year,
+                );
+                if (ctx.mounted) Navigator.pop(ctx);
+              },
             child: const Text('Submit'),
           ),
         ],
