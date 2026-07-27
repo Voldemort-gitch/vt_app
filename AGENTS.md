@@ -7,6 +7,16 @@
 This file defines the mandatory Git workflow for all AI coding agents
 (OpenCode, Claude Code, Codex, etc.) working on this repository.
 
+## AI Session Rule
+
+Before starting any coding task or Git operation in this repository:
+
+- Read this file completely.
+- Follow these instructions for the entire session.
+- These rules remain active until the session ends.
+
+---
+
 Always read this file before performing any coding or Git operation.
 
 ---
